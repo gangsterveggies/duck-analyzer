@@ -1,35 +1,38 @@
+{-# LANGUAGE BangPatterns #-}
+
 module Duck where
+
+import Duck.Types
+import Duck.Plot
 
 import qualified Data.Vector.Unboxed as UVec
 import System.Random
 
 import qualified Test.QuickCheck as QC
+
 import Statistics.Regression
+import qualified Statistics.Resampling.Bootstrap as B
 
 import Criterion
-import Criterion.Measurement
-import Criterion.Types (measTime)
+import Criterion.Main.Options (defaultConfig)
+import Criterion.Internal (runAndAnalyseOne)
+import Criterion.Monad (withConfig)
+import qualified Criterion.Types as CT
+--(DataRecord(..), Verbosity(..), Report(..), SampleAnalysis(..))
 
-type Testable = [Int]
-type Range = (Int, Int)
-data Report = Report {confidence :: Double,
-                      propConstant :: Double}
-              deriving Show
-data Test a = Test {range :: Range,
-                    iterations :: Int,
-                    precision :: Int,
-                    hypothesis :: (Testable -> Double),
-                    source :: (Testable -> a)}
+runAndPlot :: (Testable a) => String -> Test a b -> IO ()
+runAndPlot title t = do
+  fr <- runSingleTest t
+  plotReport title fr
 
-runTest :: Test a -> IO Report
-runTest t = do
+runSingleTest :: (Testable a) => Test a b -> IO FullReport
+runSingleTest t = do
   instList <- genIList (range t) (iterations t)
   testInstances <- genInstances instList
-  expTimes <- runSource (source t) (precision t) testInstances
-  let anaTimes = [(hypothesis t) vl | vl <- testInstances]
-      (const, conf) = olsRegress ([UVec.fromList expTimes]) (UVec.fromList anaTimes)
-  return (Report {confidence = conf,
-                  propConstant = (const UVec.! 1) / 1000})
+  expTimes <- runSource (source t) testInstances
+  return (FullReport {experiment = expTimes,
+                      sizes = [fromIntegral $ dimSize vl | vl <- testInstances]
+                     })
 
 genIList :: (Int, Int) -> Int -> IO [Int]
 genIList _ 0 = return []
@@ -37,17 +40,39 @@ genIList (lo, hi) iter = (:) <$>
                          QC.generate (QC.choose (lo, hi)) <*>
                          genIList (lo, hi) (iter - 1)
 
-genInstances :: [Int] -> IO [Testable]
+genInstances :: (Testable a) => [Int] -> IO [a]
 genInstances [] = return []
 genInstances (x:xs) = (:) <$>
                       (QC.generate $ QC.resize x QC.arbitrary) <*>
                       (genInstances xs)
 
-runSource :: (Testable -> a) -> Int -> [Testable] -> IO [Double]
-runSource _ _ [] = return []
-runSource src prec (x:xs) = do
-  (a, _) <- measure (whnf src x) (fromIntegral prec)
-  let b = (measTime a) / (fromIntegral prec)
-  putStrLn $ show (b, length x)
-  rs <- runSource src prec xs
-  return (b:rs)
+runSource :: (Testable a) => (a -> b) -> [a] -> IO [Double]
+runSource _ [] = return []
+runSource src (x:xs) = do
+  let res = runAndAnalyseOne 1 "" (whnf src x)
+  CT.Analysed rep <- withConfig (defaultConfig { CT.verbosity = CT.Quiet}) res
+  let !sampPoint = CT.anMean $ CT.reportAnalysis rep
+      !sampVar = CT.anOutlierVar $ CT.reportAnalysis rep
+  putStrLn $ show (sampPoint, dimSize x, sampVar)
+  rs <- runSource src xs
+  return ((B.estPoint sampPoint):rs)
+
+generateReport :: [Double] -> FullReport -> Report
+generateReport ana fr = Report {confidence = conf,
+                            propConstant = (const UVec.! 0) / 100000}
+  where (const, conf) = olsRegress [UVec.fromList (experiment fr)] (UVec.fromList (ana))
+
+testHypothesis :: (Double -> Double) -> FullReport -> Report
+testHypothesis hp fr = generateReport ana fr
+  where ana = [hp (fromIntegral vl) | vl <- (sizes fr)]
+
+-- Debug
+runSource' _ [] = return []
+runSource' src (x:xs) = do
+  let res = runAndAnalyseOne 1 "" (whnf src x)
+  CT.Analysed rep <- withConfig (defaultConfig { CT.verbosity = CT.Quiet}) res
+  let !sampPoint = CT.anMean $ CT.reportAnalysis rep
+      !sampVar = CT.anOutlierVar $ CT.reportAnalysis rep
+  putStrLn $ show (sampPoint, dimSize x, sampVar)
+  rs <- runSource' src xs
+  return ((rep):rs)
