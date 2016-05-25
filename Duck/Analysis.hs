@@ -1,14 +1,14 @@
-{-# LANGUAGE BangPatterns #-}
-
 module Duck.Analysis where
 
 import Duck.Types
 import Duck.Plot
+import Duck.Utils
 
 import qualified Data.Vector.Unboxed as UVec
 import System.Random
 
-import qualified Test.QuickCheck as QC
+import Test.QuickCheck (Arbitrary(..), generate,
+                        choose, resize, arbitrary)
 
 import Statistics.Regression
 import qualified Statistics.Resampling.Bootstrap as B
@@ -21,13 +21,17 @@ import Control.DeepSeq (NFData)
 import qualified Criterion.Types as CT
 
 
-runSingleTest :: (Testable a, NFData b) => Test a b -> IO FullReport
-runSingleTest t = do
-  instList <- genIList (range t) (iterations t)
+runSingleTest' :: (Arbitrary a, Sized a, NFData b) => Parameters -> (a -> b) -> IO FullReport
+runSingleTest' t src = runSingleTest dimSize t src
+
+runSingleTest :: (Arbitrary a, NFData b) => (a -> Int) -> Parameters -> (a -> b) -> IO FullReport
+runSingleTest dim pr src = do
+  instList <- genIList (range pr) (iterations pr)
   testInstances <- genInstances instList
-  expTimes <- runSource (source t) testInstances
+  let sizes = [fromIntegral $ dim vl | vl <- testInstances]
+  expTimes <- runSource pr (src) testInstances sizes
   return (FullReport {experiment = expTimes,
-                      sizes = [fromIntegral $ dimSize vl | vl <- testInstances]
+                      sizes = sizes
                      })
 
 testHypothesis :: (Double -> Double) -> FullReport -> Report
@@ -37,40 +41,29 @@ testHypothesis hp fr = generateReport ana fr
 genIList :: (Int, Int) -> Int -> IO [Int]
 genIList _ 0 = return []
 genIList (lo, hi) iter = (:) <$>
-                         QC.generate (QC.choose (lo, hi)) <*>
+                         generate (choose (lo, hi)) <*>
                          genIList (lo, hi) (iter - 1)
 
-genInstances :: (Testable a) => [Int] -> IO [a]
+genInstances :: (Arbitrary a) => [Int] -> IO [a]
 genInstances [] = return []
 genInstances (x:xs) = (:) <$>
-                      (QC.generate $ QC.resize x QC.arbitrary) <*>
+                      (generate $ resize x arbitrary) <*>
                       (genInstances xs)
 
-runSource :: (Testable a, NFData b) => (a -> b) -> [a] -> IO [Double]
-runSource _ [] = return []
-runSource src (x:xs) = do
-  let res = runAndAnalyseOne 1 "" (nf src x)
+runSource :: (NFData b) => Parameters -> (a -> b) -> [a] -> [Int] -> IO [Double]
+runSource _ _ [] [] = return []
+runSource pr src (inst:is) (sz:ss) = do
+  let res = runAndAnalyseOne 1 "" (nf src inst)
   CT.Analysed rep <- withConfig (defaultConfig { CT.verbosity = CT.Quiet,
-                                                 CT.timeLimit = 1.0 }) res
-  let !sampPoint = CT.anMean $ CT.reportAnalysis rep
-      !sampVar = CT.anOutlierVar $ CT.reportAnalysis rep
-  putStrLn $ show (sampPoint, dimSize x, sampVar)
-  rs <- runSource src xs
+                                                 CT.timeLimit = (timePerTest pr) }) res
+  let sampPoint = CT.anMean $ CT.reportAnalysis rep
+      sampVar = CT.anOutlierVar $ CT.reportAnalysis rep
+  putStrIf ((verbosity pr) == Full) $ show (sampPoint, sz, sampVar)
+  rs <- runSource pr src is ss
   return ((B.estPoint sampPoint):rs)
+runSource _ _ _ _ = error "Invalid instance/size"
 
 generateReport :: [Double] -> FullReport -> Report
 generateReport ana fr = Report {confidence = conf,
-                            propConstant = (const UVec.! 0) / 100000}
+                                propConstant = (const UVec.! 0) / 100000}
   where (const, conf) = olsRegress [UVec.fromList (experiment fr)] (UVec.fromList (ana))
-
-
--- Debug
-runSource' _ [] = return []
-runSource' src (x:xs) = do
-  let res = runAndAnalyseOne 1 "" (whnf src x)
-  CT.Analysed rep <- withConfig (defaultConfig { CT.verbosity = CT.Quiet}) res
-  let !sampPoint = CT.anMean $ CT.reportAnalysis rep
-      !sampVar = CT.anOutlierVar $ CT.reportAnalysis rep
-  putStrLn $ show (sampPoint, dimSize x, sampVar)
-  rs <- runSource' src xs
-  return ((rep):rs)
