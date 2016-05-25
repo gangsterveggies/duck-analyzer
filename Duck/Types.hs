@@ -22,5 +22,4 @@ data FullReport = FullReport {experiment :: [Double],
                               sizes :: [Int]}
 data Test a b = Test {range :: Range,
                       iterations :: Int,
-                      source :: (a -> b),
-                      types :: a}
+                      source :: (a -> b)}

@@ -7,20 +7,20 @@ hp n = n
 hp2 n = n^2
 hp3 n = 1
 
+slowSort :: [Int] -> [Int]
 slowSort [] = []
 slowSort xs = mn : (slowSort $ delete mn xs)
   where mn = (minimum xs)
 
 main = do
   let t = Test {
-        range = (10, 100000),
+        range = (10, 300),
         iterations = 15,
-        source = slowSort,
-        types = [0::Int]
+        source = slowSort
         }
   r <- runSingleTest t
---  putStrLn $ show $ generateReport r
-  runAndPlot "Sum" t
+  putStrLn $ show $ testHypothesis hp2 r
+  plotReport "Sum" r
 
 
 -- let res = runAndAnalyseOne 100 "o" (nf (sum) [1..1000])
