@@ -25,11 +25,13 @@ module Duck
          FullReport(..),
          -- * Running functions
          runSingleTest,
-         runSingleTest',
          plotReport,
+         plotHypothesis,
          testHypothesis,
+         testGroup,
          -- * Defaults
-         defaultParam
+         defaultParam,
+         hypothesis
        ) where
 
 import Duck.Types

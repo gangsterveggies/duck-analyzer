@@ -1,3 +1,5 @@
+module Main where
+
 import Duck
 --import Duck.Types
 import Data.List
@@ -13,24 +15,25 @@ slowSort [] = []
 slowSort xs = mn : (slowSort $ delete mn xs)
   where mn = (minimum xs)
 
-fastSort :: [Int] -> [Int]
-fastSort = sort
+fastSort :: [String] -> [String]
+fastSort = (map reverse) . sort
 
-main = do
-  let t = defaultParam {range = (100, 10000),
-                        iterations = 15,
-                        verbosity = Full}
-  r <- runSingleTest' t (fastSort)
-  
+main = do  
+  let t = defaultParam {range = (100, 3000),
+                        iterations = 10,
+                        verbosity = Full,
+                        timePerTest = 1.0}
+  r <- runSingleTest t (fastSort)
+
 --  putStrLn $ show $ testHypothesis hpc r
   putStrLn $ show $ testHypothesis hp r
   putStrLn $ show $ testHypothesis hpln r
   putStrLn $ show $ testHypothesis hp2 r
   putStrLn $ show $ testHypothesis hp3 r
-  
-  plotReport "Sum" r
 
--- TODO
--- Change instance gen
--- Plot analytical
--- Add groups
+  putStrLn $ show $ testGroup r [
+    hypothesis "linear" hp,
+    hypothesis "linearitmic" hpln,
+    hypothesis "quadratic" hp2]
+  
+  plotHypothesis r hp (testHypothesis hp r)
