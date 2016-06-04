@@ -1,3 +1,9 @@
+{-
+
+Search example.
+
+-}
+
 import Duck
 
 import Data.List

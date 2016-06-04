@@ -4,6 +4,7 @@ import Duck.Types
 import Graphics.EasyPlot
 import Data.List
 
+-- |Takes a label and a full report and plots it.
 plotReport :: String -> FullReport -> IO ()
 plotReport title fr = do
   plot X11 [Data2D [Title title, Color Red, Style Lines]
@@ -14,6 +15,8 @@ plotReport title fr = do
           exp = (experiment fr)
           comb = sort $ zip sz exp
 
+-- |Takes a list of sizes, a list of experimental times,
+-- a list of analytical times and a label and plots them.
 plotReportHypothesis :: [Int] -> [Double] -> [Double] -> String -> IO ()
 plotReportHypothesis sz exp ana ttype = do
   plot X11 [Data2D [Title "Experimental Time", Color Red, Style Lines]

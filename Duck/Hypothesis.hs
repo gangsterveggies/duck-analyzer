@@ -4,9 +4,11 @@ import Duck.Types
 
 type Hypothesis = (Double -> Double)
 
+-- |Builds a named hypothesis.
 hypothesis :: String -> Hypothesis -> (String, Hypothesis)
 hypothesis name hp = (name, hp)
 
+-- |Default hypothesis function.
 hp, hpc, hpln, hp2, hp3, hp4 :: Hypothesis
 hpc n = 1
 hp n = n

@@ -7,17 +7,15 @@
 module Duck.Types where
 
 import Text.Printf (printf)
-import Control.Monad (liftM2)
 import qualified Test.QuickCheck as QC
 import Data.Graph (Graph)
 import qualified Data.Graph as Graph
 import Data.Matrix (Matrix)
 import qualified Data.Matrix as Matrix
 
--- Sized data
-
+-- |Class for objects with size.
 class Sized t where
-   dimSize :: t -> Int
+   dimSize :: t -> Int -- ^ This function calculates the size of an object.
 
 instance (Sized a) => Sized [a] where
   dimSize arr = sum $ map (dimSize) arr
@@ -41,13 +39,10 @@ instance (Num a, Sized a) => Sized (Matrix a) where
   dimSize m = avg (Matrix.nrows m) (Matrix.ncols m)
     where avg a b = (a + b) `div` 2
 
--- Cased data
-
-two :: QC.Gen a -> QC.Gen b -> QC.Gen (a, b)
-two = liftM2 (,)
-
+-- |Class for objects that can be generated with a given size.
 class Cased a where
-  genCase :: Int -> QC.Gen a
+  genCase :: Int -> QC.Gen a  -- ^ This function produces a quickcheck
+                              -- generator of an object.
 
 instance Cased () where
   genCase _ = return ()
@@ -95,29 +90,36 @@ instance (Num a, Cased a) => Cased (Matrix a) where
 
 -- Other types
 
+-- |A range of integers.
 type Range = (Int, Int)
 
+-- |A verbosity function to control the output of functions.
 data Verbosity = Quiet
                | Moderate
                | Full
                deriving (Eq, Ord)
 
+-- |The report of a test.
 data Report = Report {confidence :: Double,
                       propConstant :: Double}
               deriving Show
 
-type GroupReport = [(String, Report)]
-
+-- |The raw report of a test.
 data FullReport = FullReport {experiment :: [Double],
                               expStd :: [Double],
                               sizes :: [Int],
                               outlierEffect :: Double}
 
+-- |The raw report of a group of tests.
+type GroupReport = [(String, Report)]
+
+-- |The parameters for a test.
 data Parameters = Parameters {range :: Range,
                               iterations :: Int,
                               timePerTest :: Double,
                               verbosity :: Verbosity}
 
+-- |The default parameters. 
 defaultParam = Parameters {range = (10, 100),
                            iterations = 15,
                            timePerTest = 1.0,

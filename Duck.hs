@@ -7,9 +7,9 @@ Stability   : stable
 
 Duck is a library to test the complexity of programs.
 
-The programmer provides one program and one or many complexity
+The programmer provides one function and one or many complexity
 functions that will be hypothesis for the theoretical behavior of the
-program. Duck then runs the program multiple times for multiple
+function. Duck then evaluates the function multiple times for multiple
 instances and compares the theoretical hypothesis with the
 experimental data, allowing to determing the complexity closest to the
 actual one.

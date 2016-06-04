@@ -1,4 +1,11 @@
+{-
+
+Matrix example.
+
+-}
+
 import Duck
+
 import Data.List
 import Data.Matrix (Matrix)
 import qualified Data.Matrix as Matrix

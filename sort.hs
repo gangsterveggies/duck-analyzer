@@ -1,4 +1,11 @@
+{-
+
+Sort example.
+
+-}
+
 import Duck
+
 import Data.List
 
 slowSort :: [Int] -> [Int]

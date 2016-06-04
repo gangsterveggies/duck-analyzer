@@ -64,6 +64,8 @@ plotHypothesis fr hp r ttype = plotReportHypothesis sz exp ana ttype
 -- |Runs a source function in a set of inputs with a given size
 -- and produces a tuple of: ([Mean], [Standard deviation], Outlier effect),
 -- wrapped in the IO monad.
+-- A quiet verbosity produces no output, a moderate one produces a summary
+-- and a full one details every step.
 runSource :: (NFData b) => Parameters -> (a -> b) -> [a] -> [Int] -> IO ([Double], [Double], Double)
 runSource _ _ [] [] = return ([], [], 0)
 runSource pr src (inst:is) (sz:ss) = do
