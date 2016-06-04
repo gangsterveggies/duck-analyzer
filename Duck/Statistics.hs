@@ -40,3 +40,8 @@ maxConf ls = [maximumBy (comparing fst) ls]
 -- keeps only the top 'sz' maximum confidence results.
 topConf :: Int -> [(Double, a)] -> [(Double, a)]
 topConf sz ls = take sz $ reverse $ sortBy (comparing fst) ls
+
+-- |A grouping function to be used with 'testGroup'. It
+-- keeps all results.
+allConf :: [(Double, a)] -> [(Double, a)]
+allConf = id 

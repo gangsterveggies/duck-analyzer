@@ -14,7 +14,7 @@ description:         Duck is a library to test the complexity of programs.
                      functions that will be hypothesis for the theoretical behavior of the
                      program. Duck then runs the program multiple times for multiple
                      instances and compares the theoretical hypothesis with the
-                     experimental data, allowing to determing the complexity closest to the
+                     experimental data, allowing to determining the complexity closest to the
                      actual one.
 
 -- The license under which the package is released.

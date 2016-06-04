@@ -1,7 +1,7 @@
 {-
+Graph example
 
-Graph example.
-
+Check README.md for more info
 -}
 
 import Duck
@@ -51,8 +51,6 @@ main = do
         hypothesis "quadratic" hp2,
         hypothesis "cubic" hp3]
 
-  putStrLn $ ("dfs: " ++) $ pbest $ map fst $ testGroup rdfs hypList (relevant)
-  putStrLn $ ("scc: " ++) $ pbest $ map fst $ testGroup rscc hypList (relevant)
   putStrLn $ ("dfs: " ++) $ pbest $ map fst $ testGroup rdfs hypList (maxConf)
   putStrLn $ ("scc: " ++) $ pbest $ map fst $ testGroup rscc hypList (maxConf)
 
@@ -63,7 +61,7 @@ main = do
 
   where pretty x = round $ x * 100
         pbest = intercalate ", "
-        writeComp r = mapM_ putStrLn [("linear " ++) $ show $
+        writeComp r = mapM_ putStrLn [("linear " ++) $ show $ pretty $
                                       confidence $ testHypothesis hp r,
-                                      ("quadratic " ++) $ show
-                                      $ confidence $ testHypothesis hp2 r]
+                                      ("quadratic " ++) $ show $ pretty $ 
+                                      confidence $ testHypothesis hp2 r]

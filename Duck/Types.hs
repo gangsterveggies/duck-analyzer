@@ -6,6 +6,8 @@
 
 module Duck.Types where
 
+import Duck.Utils
+
 import Text.Printf (printf)
 import qualified Test.QuickCheck as QC
 import Data.Graph (Graph)
@@ -88,38 +90,39 @@ instance (Num a, Cased a) => Cased (Matrix a) where
             nrow = sz `div` ncol
             nsz = ncol * nrow
 
--- Other types
 
--- |A range of integers.
+-- |Range of integers.
 type Range = (Int, Int)
 
--- |A verbosity function to control the output of functions.
+-- |Verbosity function to control the output of functions.
 data Verbosity = Quiet
                | Moderate
                | Full
                deriving (Eq, Ord)
 
--- |The report of a test.
-data Report = Report {confidence :: Double,
-                      propConstant :: Double}
+-- |Report of a test.
+data Report = Report {confidence :: Double,  -- ^ R^2 constant that charaterizes the hypothesis
+                      propConstant :: Double -- ^ Proportionality constant between experimental and analytical
+                     }
               deriving Show
 
--- |The raw report of a test.
+-- |Raw report of a test.
 data FullReport = FullReport {experiment :: [Double],
                               expStd :: [Double],
                               sizes :: [Int],
                               outlierEffect :: Double}
 
--- |The raw report of a group of tests.
+-- |Report of a group of tests.
 type GroupReport = [(String, Report)]
 
--- |The parameters for a test.
-data Parameters = Parameters {range :: Range,
-                              iterations :: Int,
-                              timePerTest :: Double,
-                              verbosity :: Verbosity}
+-- |Parameters for a test.
+data Parameters = Parameters {range :: Range,        -- ^ Range of sizes to test
+                              iterations :: Int,     -- ^ Number of points to sample
+                              timePerTest :: Double, -- ^ Approximate maximum time per iteration
+                              verbosity :: Verbosity -- ^ Level of output information in runtime
+                             }
 
--- |The default parameters. 
+-- |Default parameters. 
 defaultParam = Parameters {range = (10, 100),
                            iterations = 15,
                            timePerTest = 1.0,

@@ -43,12 +43,14 @@ module Duck
          relevant,
          maxConf,
          topConf,
+         allConf,
          -- * Hypothesis
          hypothesis,
          hpc, hp, hpln,
          hp2, hp3, hp4
        ) where
 
+import Duck.Utils
 import Duck.Types
 import Duck.Hypothesis
 import Duck.Plot

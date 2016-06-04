@@ -1,7 +1,7 @@
 {-
-
 Matrix example.
 
+Check README.md for more info
 -}
 
 import Duck
@@ -29,7 +29,7 @@ multiplyNaive (MatrixMul (a, b)) = Matrix.multStd a b
 headerText :: String
 headerText = "\t-- Duck - Complexity Tester --\n\n" ++
              " Plotting matrices algorithms\n" ++
-             "   multiplyNaive: naive cubic multiplication\n"
+             "   multiplyNaive: naive cubic matrix multiplication\n"
 
 main = do  
   let t = defaultParam {range = (50, 400),

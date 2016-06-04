@@ -1,7 +1,7 @@
 {-
+Search example
 
-Search example.
-
+Check README.md for more info
 -}
 
 import Duck
