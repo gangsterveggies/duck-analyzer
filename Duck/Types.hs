@@ -9,6 +9,10 @@ module Duck.Types where
 import Text.Printf (printf)
 import Control.Monad (liftM2)
 import qualified Test.QuickCheck as QC
+import Data.Graph (Graph)
+import qualified Data.Graph as Graph
+import Data.Matrix (Matrix)
+import qualified Data.Matrix as Matrix
 
 -- Sized data
 
@@ -30,7 +34,17 @@ instance Sized Bool where
 instance Sized Char where
   dimSize _ = 1
 
+instance Sized Graph where
+  dimSize g = max (length $ Graph.vertices g) (length $ Graph.edges g)
+
+instance (Num a, Sized a) => Sized (Matrix a) where
+  dimSize m = avg (Matrix.nrows m) (Matrix.ncols m)
+    where avg a b = (a + b) `div` 2
+
 -- Cased data
+
+two :: QC.Gen a -> QC.Gen b -> QC.Gen (a, b)
+two = liftM2 (,)
 
 class Cased a where
   genCase :: Int -> QC.Gen a
@@ -48,13 +62,13 @@ instance Cased Char where
   genCase _ = QC.arbitrary
 
 instance (Cased a, Cased b) => Cased (a, b) where
-  genCase sz = liftM2 (,) (genCase sz) (genCase sz)
+  genCase sz = two (genCase sz) (genCase sz)
 
 instance (Cased a) => Cased [a] where
   genCase sz = QC.vectorOf (sz) (genCase 1)
 
 instance {-# OVERLAPPING #-} (Cased a, Cased b) => Cased ([a], [b]) where
-  genCase sz = liftM2 (,) (genCase nvec) (genCase nvec)
+  genCase sz = two (genCase nvec) (genCase nvec)
     where nsingle = 2
           nvec = sz `div` nsingle
 
@@ -62,6 +76,22 @@ instance {-# OVERLAPPING #-} Cased [String] where
   genCase sz = QC.vectorOf (nvec) (genCase nsingle)
     where nsingle = (floor . sqrt . fromIntegral) sz
           nvec = sz `div` nsingle
+
+instance Cased Graph where
+  genCase sz = do
+    nvert <- QC.choose (nvavg `div` 2, nvavg * 2)
+    let bds = (1, nvert)
+    egds <- QC.vectorOf sz (two (QC.choose (1, nvert)) (QC.choose (1, nvert)))
+    return (Graph.buildG bds egds)
+      where nvavg = max (sz `div` 10) 1
+
+instance (Num a, Cased a) => Cased (Matrix a) where
+  genCase sz = do
+    ls <- QC.vectorOf nsz (genCase sz)
+    return (Matrix.fromList nrow ncol ls)
+      where ncol = (floor . sqrt . fromIntegral) sz
+            nrow = sz `div` ncol
+            nsz = ncol * nrow
 
 -- Other types
 

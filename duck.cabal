@@ -1,0 +1,66 @@
+-- The name of the package.
+name:                duck
+
+-- The package version.
+version:             0.1.0.0
+
+-- A short (one-line) description of the package.
+synopsis:            An experimental complexity tester
+
+-- A longer description of the package.
+description:         Duck is a library to test the complexity of programs.
+
+                     The programmer provides one program and one or many complexity
+                     functions that will be hypothesis for the theoretical behavior of the
+                     program. Duck then runs the program multiple times for multiple
+                     instances and compares the theoretical hypothesis with the
+                     experimental data, allowing to determing the complexity closest to the
+                     actual one.
+
+-- The license under which the package is released.
+license:             BSD3
+
+-- The file containing the license text.
+license-file:        LICENSE
+
+-- The package author(s).
+author:              Pedro Paredes
+
+-- An email address to which users can send suggestions, bug reports, and 
+-- patches.
+maintainer:          gangsterveggies@gmail.com
+
+-- A copyright notice.
+-- copyright:           
+
+category:            Development, Testing
+
+build-type:          Simple
+
+-- Extra files to be distributed with the package, such as examples or a 
+-- README.
+extra-source-files:  ChangeLog.md
+
+-- Constraint on the version of Cabal needed to build this package.
+cabal-version:       >=1.10
+
+
+library
+  -- Modules exported by the library.
+  exposed-modules:     Duck
+  
+  -- Modules included in this library but not exported.
+  other-modules:       Duck.Utils, Duck.Analysis, Duck.Hypothesis, Duck.Types, Duck.Plot, Duck.Statistics
+  
+  -- LANGUAGE extensions used by modules in this package.
+  other-extensions:    CPP, FlexibleInstances, OverlappingInstances
+  
+  -- Other library packages from which modules are imported.
+  build-depends:       base >=4.8 && <4.9, statistics >=0.13 && <0.14, criterion >=1.1 && <1.2, deepseq >=1.4 && <1.5, QuickCheck >=2.8 && <2.9, easyplot >=1.0 && <1.1, vector >=0.11 && <0.12
+  
+  -- Directories containing source files.
+  -- hs-source-dirs:      
+  
+  -- Base language which the package is written in.
+  default-language:    Haskell2010
+  

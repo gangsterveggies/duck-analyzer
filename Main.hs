@@ -1,5 +1,3 @@
-module Main where
-
 import Duck
 --import Duck.Types
 import Data.List

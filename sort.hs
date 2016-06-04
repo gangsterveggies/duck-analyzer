@@ -27,10 +27,14 @@ main = do
   putStrLn ""
   putStrLn $ "Reporting fast with " ++
     (show $ pretty $ outlierEffect rfast) ++
-    "% of outside effects"
+    "% of outside effects (" ++
+    (outlierReport $ outlierEffect rfast) ++
+    ")"
   putStrLn $ "Reporting slow with " ++
     (show $ pretty $ outlierEffect rslow) ++
-    "% of outside effects"
+    "% of outside effects ( " ++
+    (outlierReport $ outlierEffect rslow) ++
+    ")"
 
   let hypList = [
         hypothesis "linear" hp,
@@ -38,8 +42,8 @@ main = do
         hypothesis "quadratic" hp2,
         hypothesis "cubic" hp3]
 
-  putStrLn $ ("fastSort: " ++) $ pbest $ map fst $ testGroup rfast hypList
-  putStrLn $ ("slowSort: " ++) $ pbest $ map fst $ testGroup rslow hypList
+  putStrLn $ ("fastSort: " ++) $ pbest $ map fst $ testGroup rfast hypList (relevant)
+  putStrLn $ ("slowSort: " ++) $ pbest $ map fst $ testGroup rslow hypList (relevant)
 
   where pretty x = round $ x * 100
         pbest = intercalate ", "

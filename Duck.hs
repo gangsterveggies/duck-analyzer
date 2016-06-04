@@ -18,21 +18,31 @@ actual one.
 module Duck
        (
          -- * Typeclasses and Types for testing
+         -- ** Test case classes
          Sized(..),
          Cased(..),
+         -- ** Input and output datas
          Parameters(..),
          Verbosity(..),
          Report(..),
          FullReport(..),
          GroupReport(..),
-         -- * Running functions
+         Hypothesis,
+         -- * Worker functions
+         -- ** Generate full reports
          runSingleTest,
-         plotReport,
-         plotHypothesis,
+         -- ** Hypothesis testing
          testHypothesis,
          testGroup,
+         -- ** Plotting
+         plotReport,
+         plotHypothesis,
          -- * Defaults
          defaultParam,
+         outlierReport,
+         relevant,
+         maxConf,
+         topConf,
          -- * Hypothesis
          hypothesis,
          hpc, hp, hpln,
@@ -42,4 +52,5 @@ module Duck
 import Duck.Types
 import Duck.Hypothesis
 import Duck.Plot
+import Duck.Statistics
 import Duck.Analysis

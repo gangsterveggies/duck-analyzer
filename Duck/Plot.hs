@@ -14,12 +14,12 @@ plotReport title fr = do
           exp = (experiment fr)
           comb = sort $ zip sz exp
 
-plotReportHypothesis :: [Int] -> [Double] -> [Double] -> IO ()
-plotReportHypothesis sz exp ana = do
-  plot X11 [Data2D [Title "exp", Color Red, Style Lines]
+plotReportHypothesis :: [Int] -> [Double] -> [Double] -> String -> IO ()
+plotReportHypothesis sz exp ana ttype = do
+  plot X11 [Data2D [Title "Experimental Time", Color Red, Style Lines]
             opts
             [(fromIntegral x, y) | (x, y) <- combExp],
-            Data2D [Title "ana", Color Blue, Style Lines]
+            Data2D [Title ("Analytic Time (" ++ ttype ++ ")"), Color Blue, Style Lines]
             opts
             [(fromIntegral x, y) | (x, y) <- combAna]]
   return ()

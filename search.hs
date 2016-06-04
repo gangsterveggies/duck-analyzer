@@ -37,7 +37,7 @@ slowSearchWC (OrdInt a) = slowSearch a
 
 headerText :: String
 headerText = "\t-- Duck - Complexity Tester --\n\n" ++
-             " Testing sorting algorithms\n" ++
+             " Testing search algorithms\n" ++
              "   fastSearch:   search with haskell Set\n" ++
              "   slowSearch:   linear search in list (randomly generated)\n" ++
              "   slowSearchWC: linear search in list (worst case generated)\n"
@@ -55,13 +55,19 @@ main = do
   putStrLn ""
   putStrLn $ "Reporting fast with " ++
     (show $ pretty $ outlierEffect rfast) ++
-    "% of outside effects"
+    "% of outside effects (" ++
+    (outlierReport $ outlierEffect rfast) ++
+    ")"
   putStrLn $ "Reporting slow with " ++
     (show $ pretty $ outlierEffect rslow) ++
-    "% of outside effects"
+    "% of outside effects (" ++
+    (outlierReport $ outlierEffect rslow) ++
+    ")"
   putStrLn $ "Reporting slowWC with " ++
     (show $ pretty $ outlierEffect rslowWC) ++
-    "% of outside effects"
+    "% of outside effects (" ++
+    (outlierReport $ outlierEffect rslowWC) ++
+    ")"
 
   let hypList = [
         hypothesis "linear" hp,
@@ -69,9 +75,9 @@ main = do
         hypothesis "quadratic" hp2,
         hypothesis "cubic" hp3]
 
-  putStrLn $ ("fastSearch: " ++)   $ pbest $ map fst $ testGroup rfast hypList
-  putStrLn $ ("slowSearch: " ++)   $ pbest $ map fst $ testGroup rslow hypList
-  putStrLn $ ("slowSearchWC: " ++) $ pbest $ map fst $ testGroup rslowWC hypList
+  putStrLn $ ("fastSearch: " ++)   $ pbest $ map fst $ testGroup rfast hypList (relevant)
+  putStrLn $ ("slowSearch: " ++)   $ pbest $ map fst $ testGroup rslow hypList (relevant)
+  putStrLn $ ("slowSearchWC: " ++) $ pbest $ map fst $ testGroup rslowWC hypList (relevant)
 
   where pretty x = round $ x * 100
         pbest = intercalate ", "
