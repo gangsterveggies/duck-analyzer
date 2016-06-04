@@ -6,6 +6,7 @@
 
 module Duck.Types where
 
+import Text.Printf (printf)
 import Control.Monad (liftM2)
 import qualified Test.QuickCheck as QC
 
@@ -33,8 +34,6 @@ instance Sized Char where
 
 class Cased a where
   genCase :: Int -> QC.Gen a
-  chooseRange :: a -> Int -> Int
-  chooseRange _ _ = 1
 
 instance Cased () where
   genCase _ = return ()
@@ -54,30 +53,35 @@ instance (Cased a, Cased b) => Cased (a, b) where
 instance (Cased a) => Cased [a] where
   genCase sz = QC.vectorOf (sz) (genCase 1)
 
+instance {-# OVERLAPPING #-} (Cased a, Cased b) => Cased ([a], [b]) where
+  genCase sz = liftM2 (,) (genCase nvec) (genCase nvec)
+    where nsingle = 2
+          nvec = sz `div` nsingle
+
 instance {-# OVERLAPPING #-} Cased [String] where
   genCase sz = QC.vectorOf (nvec) (genCase nsingle)
-    where nsingle = chooseRange (undefined::[String]) sz
+    where nsingle = (floor . sqrt . fromIntegral) sz
           nvec = sz `div` nsingle
-  chooseRange _ sz = (floor . sqrt . fromIntegral) sz
 
 -- Other types
 
 type Range = (Int, Int)
 
 data Verbosity = Quiet
+               | Moderate
                | Full
-               deriving Eq
+               deriving (Eq, Ord)
 
 data Report = Report {confidence :: Double,
                       propConstant :: Double}
               deriving Show
 
-data GroupReport = GroupReport {relevantHypothesis :: [(String, Report)]}
-              deriving Show
+type GroupReport = [(String, Report)]
 
 data FullReport = FullReport {experiment :: [Double],
                               expStd :: [Double],
-                              sizes :: [Int]}
+                              sizes :: [Int],
+                              outlierEffect :: Double}
 
 data Parameters = Parameters {range :: Range,
                               iterations :: Int,
@@ -87,7 +91,4 @@ data Parameters = Parameters {range :: Range,
 defaultParam = Parameters {range = (10, 100),
                            iterations = 15,
                            timePerTest = 1.0,
-                           verbosity = Quiet}
-
-hypothesis :: String -> (Double -> Double) -> (String, (Double -> Double))
-hypothesis name hp = (name, hp)
+                           verbosity = Moderate}

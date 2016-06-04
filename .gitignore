@@ -16,4 +16,6 @@ cabal.sandbox.config
 *.dat
 .stack-work/
 Main
+sort
+search
 *~

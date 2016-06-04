@@ -3,7 +3,7 @@ Module      : Duck
 Description : An experimental complexity tester
 Copyright   : (c) Pedro Paredes, 2016
 Maintainer  : gangsterveggies@gmail.com
-Stability   : experimental
+Stability   : stable
 
 Duck is a library to test the complexity of programs.
 
@@ -18,11 +18,13 @@ actual one.
 module Duck
        (
          -- * Typeclasses and Types for testing
-         Sized,
+         Sized(..),
+         Cased(..),
          Parameters(..),
          Verbosity(..),
          Report(..),
          FullReport(..),
+         GroupReport(..),
          -- * Running functions
          runSingleTest,
          plotReport,
@@ -31,9 +33,13 @@ module Duck
          testGroup,
          -- * Defaults
          defaultParam,
-         hypothesis
+         -- * Hypothesis
+         hypothesis,
+         hpc, hp, hpln,
+         hp2, hp3, hp4
        ) where
 
 import Duck.Types
+import Duck.Hypothesis
 import Duck.Plot
 import Duck.Analysis

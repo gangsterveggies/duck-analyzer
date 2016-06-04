@@ -18,22 +18,35 @@ slowSort xs = mn : (slowSort $ delete mn xs)
 fastSort :: [String] -> [String]
 fastSort = (map reverse) . sort
 
+fastSum :: [Int] -> [Int]
+fastSum = map (+1)
+
 main = do  
-  let t = defaultParam {range = (100, 3000),
-                        iterations = 10,
-                        verbosity = Full,
-                        timePerTest = 1.0}
-  r <- runSingleTest t (fastSort)
+  let t = defaultParam {range = (100, 500),
+                        iterations = 15}
+
+--  rsum <- runSingleTest t (fastSum)
+--  rfast <- runSingleTest t (fastSort)
+  rslow <- runSingleTest t (slowSort)
 
 --  putStrLn $ show $ testHypothesis hpc r
-  putStrLn $ show $ testHypothesis hp r
-  putStrLn $ show $ testHypothesis hpln r
-  putStrLn $ show $ testHypothesis hp2 r
-  putStrLn $ show $ testHypothesis hp3 r
+--  putStrLn $ show $ testHypothesis hp r
+--  putStrLn $ show $ testHypothesis hpln r
+--  putStrLn $ show $ testHypothesis hp2 r
+--  putStrLn $ show $ testHypothesis hp3 r
 
-  putStrLn $ show $ testGroup r [
-    hypothesis "linear" hp,
-    hypothesis "linearitmic" hpln,
-    hypothesis "quadratic" hp2]
+  let hypList = [
+        hypothesis "linear" hp,
+        hypothesis "linearitmic" hpln,
+        hypothesis "quadratic" hp2,
+        hypothesis "cubic" hp3]
+
+--  putStrLn $ show $ map fst $ testGroup rsum hypList
+--  putStrLn $ show $ map fst $ testGroup rfast hypList
+  putStrLn $ show $ map fst $ testGroup rslow hypList
+  putStrLn $ show $ outlierEffect rslow
+
+--  putStrLn $ show (cconst hp rsum, cconst hp rfast)
   
-  plotHypothesis r hp (testHypothesis hp r)
+--  plotHypothesis rsum hp2 (testHypothesis hp2 rsum)
+  where cconst hyp fr = (propConstant $ testHypothesis hyp fr)

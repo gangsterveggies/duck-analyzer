@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Duck.Utils where
 
 import Debug.Trace
